@@ -1,0 +1,50 @@
+Compatibility Layer
+libfastjson offers some limited source code compatiblity to
+json-c via preprocessor macros. They are currently primarily
+targeted at what the rsyslog family of projects need.
+Also, they do not work work properly with ./configure checks.
+This is due to the way autotools checks for functions.
+
+Differences to json-c
+---------------------
+
+* hash tables are no longer part of the API; we may use them
+  internally, but we may also use any other data structure. This
+  is not of concern for the caller.
+
+* we removed the json_object_object_foreach[C] macros, which
+  required the caller to known library implementation details.
+  The same functionality is provided in a clean way via
+  fjson_object_iter_*()
+
+* we do NOT handle NUL characters inside strings or names
+  At the time of fork, json-c did not properly handle this, but
+  could at least, with tricks, generate outbound json with NUL
+  in string values. We do not support this.
+  This also means libfastjson is not 100% JSON compliant. Sorry
+  for that, but we try to keep things working great in the C
+  spirit, and that JSON feature simply doesn't play well here.
+  If you need 100% JSON compliance, look for another library.
+
+* Windows and Android are not supported. If you want to actively
+  maintain libfastjson on those platforms, please let us know
+  and we can work together (a long term commitment) to get this
+  going again.
+
+* removed API calls:
+  If you need any of this API calls urgently, please let us know
+  why you consider it important enough to become re-added;
+  especially let us know why you think this is important to the
+  community at large. Thanks.
+  * [f]json_c_version_num()
+  * [f]json_object_get_object()
+    It returns a hash table, which exposes an implementation detail
+    that a caller should never know about. Most often, this can cleanly
+    be replaced by the regular json_object_iter_* API.
+
+* renamed API calls:
+  * all calls have been added an "f" in the front
+  json_* --> fjson_*
+  * the same holds true for preprocessor defines,
+    JSON_C_* --> FJSON_* (note removal of "_C")
+  * json_c_version() -> fjson_version()
